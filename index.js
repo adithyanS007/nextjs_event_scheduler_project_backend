@@ -16,8 +16,9 @@ async function startServer() {
 
     const app = express();
 
-    // Configure CORS properly
     const allowedOrigins = ['https://nextjs-event-scheduler-project-fron.vercel.app'];
+
+    // Properly configure CORS
     app.use(cors({
       origin: allowedOrigins,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -25,17 +26,33 @@ async function startServer() {
       credentials: true,
     }));
 
-    // Handle preflight requests
-    app.options('*', cors());
+    // Explicitly set headers for preflight requests
+    app.use((req, res, next) => {
+      res.header("Access-Control-Allow-Origin", allowedOrigins[0]);
+      res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+      res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+      res.header("Access-Control-Allow-Credentials", "true"); // Ensure credentials are accepted
 
-    const server = new ApolloServer({ typeDefs, resolvers });
+      if (req.method === "OPTIONS") {
+        return res.sendStatus(200);
+      }
+      next();
+    });
+
+    const server = new ApolloServer({
+      typeDefs,
+      resolvers,
+      context: ({ req }) => ({
+        headers: req.headers,
+      }),
+    });
 
     await server.start();
-    server.applyMiddleware({ app, cors: true }); // Ensure Apollo accepts CORS
+    server.applyMiddleware({ app, cors: false }); // Disable Apollo's built-in CORS
 
-    app.listen(process.env.PORT, () =>
-      console.log(`Server ready at http://localhost:${process.env.PORT}${server.graphqlPath}`)
-    );
+    app.listen(process.env.PORT, () => {
+      console.log(`Server ready at http://localhost:${process.env.PORT}${server.graphqlPath}`);
+    });
   } catch (err) {
     console.error('Failed to start server', err);
   }
