@@ -16,25 +16,22 @@ async function startServer() {
 
     const app = express();
 
+    // Configure CORS properly
     const allowedOrigins = ['https://nextjs-event-scheduler-project-fron.vercel.app'];
-
     app.use(cors({
-      origin: function (origin, callback) {
-        if (!origin || allowedOrigins.includes(origin)) {
-          callback(null, true);
-        } else {
-          callback(new Error('Not allowed by CORS'));
-        }
-      },
+      origin: allowedOrigins,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization'],
       credentials: true,
     }));
 
+    // Handle preflight requests
+    app.options('*', cors());
+
     const server = new ApolloServer({ typeDefs, resolvers });
 
     await server.start();
-    server.applyMiddleware({ app, cors: false }); // Important: disable Apollo’s own CORS
+    server.applyMiddleware({ app, cors: true }); // Ensure Apollo accepts CORS
 
     app.listen(process.env.PORT, () =>
       console.log(`Server ready at http://localhost:${process.env.PORT}${server.graphqlPath}`)
