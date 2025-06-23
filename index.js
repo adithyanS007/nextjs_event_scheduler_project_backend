@@ -28,6 +28,10 @@ async function startServer() {
       credentials: true,
     }));
 
+     app.use(express.json());
+
+     app.options("*", cors());
+
     const server = new ApolloServer({
       typeDefs,
       resolvers,
