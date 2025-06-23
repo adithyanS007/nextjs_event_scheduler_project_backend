@@ -12,7 +12,7 @@ async function startServer() {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
-    console.log('✅ MongoDB connected');
+    console.log('MongoDB connected');
 
     const app = express();
 
@@ -51,10 +51,10 @@ async function startServer() {
     server.applyMiddleware({ app, cors: false }); // Disable Apollo's built-in CORS
 
     app.listen(process.env.PORT, () => {
-      console.log(`🚀 Server ready at http://localhost:${process.env.PORT}${server.graphqlPath}`);
+      console.log(`Server ready at http://localhost:${process.env.PORT}${server.graphqlPath}`);
     });
   } catch (err) {
-    console.error('❌ Failed to start server', err);
+    console.error('Failed to start server', err);
   }
 }
 
