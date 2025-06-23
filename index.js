@@ -1,10 +1,12 @@
-const express = require('express');
-const cors = require('cors');
-const { ApolloServer } = require('apollo-server-express');
-const mongoose = require('mongoose');
-const typeDefs = require('./schema');
-const resolvers = require('./resolvers');
-require('dotenv').config();
+const express = require("express");
+const cors = require("cors");
+const { ApolloServer } = require("apollo-server-express");
+const mongoose = require("mongoose");
+const typeDefs = require("./schema");
+const resolvers = require("./resolvers");
+const dotenv = require("dotenv");
+
+dotenv.config();
 
 async function startServer() {
   try {
@@ -12,32 +14,19 @@ async function startServer() {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
-    console.log('MongoDB connected');
+    console.log("MongoDB connected");
 
     const app = express();
 
-    // Fix CORS properly
-    const allowedOrigins = ['https://nextjs-event-scheduler-project-fron.vercel.app'];
+    const allowedOrigin = "https://nextjs-event-scheduler-project-fron.vercel.app";
 
+    // Use CORS middleware correctly
     app.use(cors({
-      origin: allowedOrigins[0], // Ensure it's properly set
-      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization'],
+      origin: allowedOrigin,
+      methods: ["GET", "POST", "PUT", "DELETE"],
+      allowedHeaders: ["Content-Type", "Authorization"],
       credentials: true,
     }));
-
-    // Handle preflight OPTIONS requests properly
-    app.use((req, res, next) => {
-      res.header("Access-Control-Allow-Origin", allowedOrigins[0]);
-      res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-      res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-      res.header("Access-Control-Allow-Credentials", "true");
-
-      if (req.method === "OPTIONS") {
-        return res.sendStatus(200);
-      }
-      next();
-    });
 
     const server = new ApolloServer({
       typeDefs,
@@ -48,13 +37,15 @@ async function startServer() {
     });
 
     await server.start();
-    server.applyMiddleware({ app, cors: false }); // Disable Apollo's built-in CORS
+    server.applyMiddleware({ app, cors: false }); // Let Express handle CORS
 
     app.listen(process.env.PORT, () => {
-      console.log(`Server ready at http://localhost:${process.env.PORT}${server.graphqlPath}`);
+      console.log(
+        `Server ready at http://localhost:${process.env.PORT}${server.graphqlPath}`
+      );
     });
   } catch (err) {
-    console.error('Failed to start server', err);
+    console.error("Failed to start server", err);
   }
 }
 
